@@ -120,10 +120,21 @@ async function fetchTeamStrengths(results) {
 }
 
 function calcFormScores(results) {
-  // Yksinkertainen form-pisteytys lohkotulosten perusteella
-  // Tässä vaiheessa meillä ei ole match-by-match dataa, joten käytetään
-  // advancing-statusta: mitä pidemmälle joukkue on päässyt, sitä vahvempi
   const scores = {};
+
+  // Lohkovaihe: normalisoi pisteet+maaliero → 0–0.4 per joukkue
+  const gs = results.groupStandings || {};
+  const allRows = Object.values(gs);
+  if (allRows.length > 0) {
+    const maxPts = Math.max(...allRows.map(r => r.points), 1);
+    const maxGD  = Math.max(...allRows.map(r => r.goalDiff), 1);
+    for (const [team, row] of Object.entries(gs)) {
+      // Lohkovaiheen voima 0–0.4: pisteet (70%) + maaliero (30%)
+      scores[team] = 0.4 * (0.7 * (row.points / maxPts) + 0.3 * (Math.max(row.goalDiff, 0) / maxGD));
+    }
+  }
+
+  // Pudotuspelit lisäävät arvoa päälle (0.25–1.0)
   const stages = [
     { set: results.top16 || [], value: 0.25 },
     { set: results.top8  || [], value: 0.50 },
@@ -134,7 +145,8 @@ function calcFormScores(results) {
 
   for (const { set, value } of stages) {
     for (const team of set) {
-      if (!scores[team]) scores[team] = value;
+      // Ota suurempi: pudotuspelitieto ohittaa lohkovaiheen jos korkeampi
+      if (!scores[team] || scores[team] < value) scores[team] = value;
     }
   }
   return scores;

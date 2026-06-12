@@ -63,7 +63,7 @@ async function fetchFromApi() {
 function parseResults(standings, matchesData) {
   const results = emptyResults();
 
-  // Lohkotaulukot
+  // Lohkotaulukot + joukkueiden lohkovaiheen form-data
   for (const group of (standings.standings || [])) {
     const letter = (group.group || '').replace('GROUP_', '');
     if (!letter || !group.table?.length) continue;
@@ -75,6 +75,17 @@ function parseResults(standings, matchesData) {
       };
     } else {
       results.groups[letter] = { winner: null, complete: false };
+    }
+    // Tallenna jokaisen joukkueen lohkovaihedata form-laskentaa varten
+    for (const row of group.table) {
+      if (!row.team?.name || row.playedGames === 0) continue;
+      results.groupStandings[row.team.name] = {
+        points: row.points ?? 0,
+        played: row.playedGames ?? 0,
+        won: row.won ?? 0,
+        goalDiff: row.goalDifference ?? 0,
+        goalsFor: row.goalsFor ?? 0,
+      };
     }
   }
 
@@ -115,6 +126,7 @@ function parseResults(standings, matchesData) {
 function emptyResults() {
   return {
     groups: {},
+    groupStandings: {},
     top16: [], top8: [], top4: [], top2: [],
     winner: null,
     stagesComplete: { groups: false, top16: false, top8: false, top4: false, top2: false, final: false },
