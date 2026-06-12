@@ -181,6 +181,7 @@ function calcOracleScore(participant, teamStrengths) {
     for (const team of (list || [])) weights[team] = (weights[team] || 0) + w;
   };
 
+  add(participant.groupWinners || [], 0.5);
   add(participant.top16, 1);
   add(participant.top8,  2);
   add(participant.top4,  3);
