@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ISKTR MM-kisaveikkaus 2026</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body data-page="index">
+
+  <header class="site-header">
+    <div class="container">
+      <span class="site-title">⚽ ISKTR MM-kisaveikkaus</span>
+      <nav>
+        <a href="/" class="nav-link active">Tilanne</a>
+        <a href="/ennusteet.html" class="nav-link">Kaikki rivit</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <section class="oracle-section">
+      <div class="oracle-card">
+        <div class="oracle-eyebrow">🔮 ISKTR-oraakkeli povaa</div>
+        <div class="oracle-leader" id="oracle-leader">…</div>
+        <div class="oracle-subtitle" id="oracle-subtitle">Ladataan ennustetta</div>
+        <div class="oracle-bars" id="oracle-bars"></div>
+        <div class="oracle-updated" id="oracle-updated"></div>
+      </div>
+    </section>
+
+    <section class="leaderboard-section">
+      <h2 class="section-title">Pistejärjestys</h2>
+      <div class="leaderboard-note" id="leaderboard-note"></div>
+      <div class="table-wrapper">
+        <table class="leaderboard-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Pelaaja</th>
+              <th>Pisteet</th>
+              <th title="Lohkovoittajat">Lohko</th>
+              <th title="Top 16 oikein">16</th>
+              <th title="Top 8 oikein">8</th>
+              <th title="Top 4 oikein">4</th>
+              <th title="Finalistit oikein">2</th>
+              <th title="Voittaja oikein">V</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-body">
+            <tr><td colspan="9" class="loading">Ladataan tuloksia…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">ISKTR MM-kisaveikkaus 2026</div>
+  </footer>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
