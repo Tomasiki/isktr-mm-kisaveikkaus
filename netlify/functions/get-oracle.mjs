@@ -42,11 +42,14 @@ export default async function handler(req, context) {
       .sort((a, b) => b.score - a.score);
 
     const maxScore = ranking[0]?.score || 1;
+    const minScore = ranking[ranking.length - 1]?.score || 0;
+    const scoreRange = maxScore - minScore || 1;
     const result = {
       ranking: ranking.map((r, i) => ({
         name: r.name,
         score: r.score,
-        normalizedScore: maxScore > 0 ? Math.round((r.score / maxScore) * 100) : 0,
+        // Normalisoidaan välille 10–100 jotta kukaan ei ole 0% lohkovaiheen alussa
+        normalizedScore: Math.round(10 + 90 * ((r.score - minScore) / scoreRange)),
         text: FUN_TEXTS[Math.min(i, FUN_TEXTS.length - 1)],
       })),
       leader: ranking[0]?.name,
@@ -201,9 +204,12 @@ const FI_TO_EN = {
   "Espanja":"Spain","Hollanti":"Netherlands","Alankomaat":"Netherlands","Japani":"Japan",
   "Kanada":"Canada","Meksiko":"Mexico","Mexico":"Mexico","Norja":"Norway","Portugali":"Portugal",
   "Ranska":"France","Saksa":"Germany","Sveitsi":"Switzerland","Turkki":"Türkiye",
-  "Argentiina":"Argentina","Kroatia":"Croatia","Kolumbia":"Colombia","Senegal":"Senegal",
+  "Kroatia":"Croatia","Kolumbia":"Colombia","Senegal":"Senegal",
   "Ruotsi":"Sweden","Skotlanti":"Scotland","Itävalta":"Austria","Uruguay":"Uruguay",
   "USA":"United States","Ecuador":"Ecuador","Equador":"Ecuador","Marokko":"Morocco",
-  "Tsekki":"Czechia","Paraguay":"Paraguay","Etelä-Korea":"Korea Republic",
+  "Tsekki":"Czechia","Paraguay":"Paraguay",
+  "Etelä-Korea":"South Korea","Korea Republic":"South Korea",
+  "Bosnia-H":"Bosnia and Herzegovina","Bosnia-Herzegovina":"Bosnia and Herzegovina",
+  "Usa":"United States",
 };
 function toEn(name) { return FI_TO_EN[name] || name; }
