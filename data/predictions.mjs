@@ -1,10 +1,10 @@
 export const participants = [
   {
     name: "RP",
-    groupWinners: ["Mexico", "Sveitsi", "Brasilia", "Turkki", "Saksa", "Hollanti",
+    groupWinners: ["Meksiko", "Sveitsi", "Brasilia", "Turkki", "Saksa", "Hollanti",
                    "Belgia", "Espanja", "Ranska", "Argentiina", "Portugali", "Englanti"],
     top16: ["Bosnia-H", "Saksa", "Hollanti", "Brasilia", "Ranska", "Norja",
-            "Mexico", "Englanti", "Turkki", "Belgia", "Croatia", "Espanja",
+            "Meksiko", "Englanti", "Turkki", "Belgia", "Kroatia", "Espanja",
             "Sveitsi", "Argentiina", "Portugali", "USA"],
     top8:  ["Saksa", "Brasilia", "Norja", "Englanti", "Belgia", "Espanja", "Argentiina", "Portugali"],
     top4:  ["Saksa", "Englanti", "Espanja", "Portugali"],
@@ -14,7 +14,7 @@ export const participants = [
   },
   {
     name: "MP",
-    groupWinners: ["Meksiko", "Sveitsi", "Brasilia", "Usa", "Saksa", "Japani",
+    groupWinners: ["Meksiko", "Sveitsi", "Brasilia", "USA", "Saksa", "Japani",
                    "Belgia", "Espanja", "Ranska", "Argentiina", "Portugali", "Englanti"],
     top16: ["Kanada", "Brasilia", "Japani", "Meksiko", "Espanja", "Belgia", "Turkki",
             "Sveitsi", "Saksa", "Ecuador", "Ranska", "Englanti", "Kroatia",
@@ -27,9 +27,9 @@ export const participants = [
   },
   {
     name: "SE",
-    groupWinners: ["Meksiko", "Sveitsi", "Brasilia", "Turkki", "Equador", "Hollanti",
+    groupWinners: ["Meksiko", "Sveitsi", "Brasilia", "Turkki", "Ecuador", "Hollanti",
                    "Belgia", "Espanja", "Norja", "Argentiina", "Portugali", "Englanti"],
-    top16: ["Sveitsi", "Brasilia", "Turkki", "Saksa", "Equador", "Japani",
+    top16: ["Sveitsi", "Brasilia", "Turkki", "Saksa", "Ecuador", "Japani",
             "Hollanti", "Espanja", "Ranska", "Norja", "Senegal", "Argentiina",
             "Portugali", "Kolumbia", "Englanti", "Kroatia"],
     top8:  ["Espanja", "Ranska", "Argentiina", "Norja", "Portugali", "Englanti", "Hollanti", "Turkki"],
@@ -53,11 +53,11 @@ export const participants = [
   },
   {
     name: "TW",
-    groupWinners: ["Etelä-Korea", "Sveitsi", "Brasilia", "Turkki", "Saksa", "Alankomaat",
+    groupWinners: ["Etelä-Korea", "Sveitsi", "Brasilia", "Turkki", "Saksa", "Hollanti",
                    "Belgia", "Espanja", "Ranska", "Argentiina", "Portugali", "Englanti"],
     top16: ["Espanja", "Ranska", "Argentiina", "Portugali",
             "Saksa", "Brasilia", "Englanti", "Sveitsi",
-            "Uruguay", "Belgia", "Marokko", "Kolumbia", "Senegal", "Kroatia", "Alankomaat", "Meksiko"],
+            "Uruguay", "Belgia", "Marokko", "Kolumbia", "Senegal", "Kroatia", "Hollanti", "Meksiko"],
     top8:  ["Espanja", "Ranska", "Argentiina", "Portugali", "Saksa", "Brasilia", "Englanti", "Sveitsi"],
     top4:  ["Espanja", "Ranska", "Argentiina", "Portugali"],
     top2:  ["Espanja", "Ranska"],

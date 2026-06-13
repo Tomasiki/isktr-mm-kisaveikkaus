@@ -78,7 +78,6 @@ function renderOracleBars(container, ranking) {
         <div class="oracle-bar-track">
           <div class="oracle-bar-fill" style="width:${pct}%"></div>
         </div>
-        <span class="oracle-bar-pct">${pct}%</span>
       </div>`;
   }).join('');
 }
@@ -174,8 +173,10 @@ function renderPredictions(results) {
   const rows = [];
 
   sections.forEach(({ label, key }) => {
-    // Otsikkorivi
-    rows.push(`<tr><td class="stage-header" colspan="${participants.length + 1}">${label}</td></tr>`);
+    // Otsikkorivi: nimi vasemmalla, pienellä pelaajan nimi per sarake
+    rows.push(`<tr><td class="stage-header stage-label">${label}</td>` +
+      participants.map(p => `<td class="stage-header player-mini">${p.name}</td>`).join('') +
+    `</tr>`);
 
     const maxLen = Math.max(...participants.map(p => (p[key] || []).length));
     for (let i = 0; i < maxLen; i++) {
@@ -188,7 +189,9 @@ function renderPredictions(results) {
   });
 
   // Voittaja-rivi
-  rows.push(`<tr><td class="stage-header" colspan="${participants.length + 1}">Voittaja</td></tr>`);
+  rows.push(`<tr><td class="stage-header stage-label">Voittaja</td>` +
+    participants.map(p => `<td class="stage-header player-mini">${p.name}</td>`).join('') +
+  `</tr>`);
   const winnerCells = participants.map(p => {
     const isCorrect = winnerEn && teamToEnglish(p.winner) === winnerEn;
     return `<td><span class="${isCorrect ? 'winner-chip' : 'team-chip unknown'}">${p.winner} ${isCorrect ? '🏆' : ''}</span></td>`;

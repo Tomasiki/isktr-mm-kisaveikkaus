@@ -8,7 +8,7 @@ export const toEnglish = {
   "Equador": "Ecuador",
   "Englanti": "England",
   "Espanja": "Spain",
-  "Etelä-Korea": "Korea Republic",
+  "Etelä-Korea": "South Korea",
   "Hollanti": "Netherlands",
   "Alankomaat": "Netherlands",
   "Itävalta": "Austria",
