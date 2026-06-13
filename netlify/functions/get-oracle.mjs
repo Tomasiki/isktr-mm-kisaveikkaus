@@ -257,7 +257,7 @@ const FI_TO_EN = {
   "Ruotsi":"Sweden","Skotlanti":"Scotland","Itävalta":"Austria","Uruguay":"Uruguay",
   "USA":"United States","Ecuador":"Ecuador","Equador":"Ecuador","Marokko":"Morocco",
   "Tsekki":"Czechia","Paraguay":"Paraguay",
-  "Etelä-Korea":"South Korea","Korea Republic":"South Korea",
+  "Etelä-Korea":"South Korea","Korea Republic":"South Korea","Egypti":"Egypt",
   "Bosnia-H":"Bosnia and Herzegovina","Bosnia-Herzegovina":"Bosnia and Herzegovina",
   "Usa":"United States",
 };
