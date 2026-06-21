@@ -5,60 +5,109 @@ const CACHE_TTL_MS = 60 * 60 * 1000; // 60 min
 const ODDS_BASE = 'https://api.the-odds-api.com/v4';
 
 const FUN_TEXTS_BY_RANK = [
-  // Sija 1 — johtaja
+  // Sija 1 — johtaja (täysin mahtipontiset)
   [
-    'Oraakkeli on puhunut. Kisa on jo ratkaistu. 🔮',
-    'Salamyhkäiset voimat suosivat tätä veikkausta. Yritä olla yllättymättä. ⚡',
-    'Muut pelaajat taistelevat hopeasta. 👑',
-    'Oraakkeli näkee sinut jo palkintopöydässä — varaa paikka. 🏆',
-    'Tilastot eivät valehtele. Sinä et valehtele. Yhteensattuma? Oraakkeli ei usko sattumaan. 🌌',
+    'Jos tämä olisi elokuva, se olisi jo ohi. Rullataan lopputekstit. 👑',
+    'Oraakkeli ei yleensä ihaile. Tällä kertaa se tekee poikkeuksen. Pienen. 🔮',
+    'Kosminen tasapaino on puhunut. Muut taistelevat viidennestä sijasta. ⚡',
+    'Oraakkeli harjoittelee onnittelupuheenvuoroa. Se on jo puhtaaksikirjoitettu. 🎤',
+    'Muut pelaajat eivät tiedä, mutta oraakkeli tietää. Ja nyt sinäkin tiedät. 🌌',
+    'Potti lähestyy. Oraakkeli suosittelee jo miettimään, mihin sen käyttää. 💰',
   ],
   // Sija 2
   [
-    'Johtaja nukkuu. Mestari herää. Oraakkeli odottaa kärsivällisesti. 👀',
-    'Yksi käänne ja kaikki muuttuu. Käännettä ei tarvita paljoa. 🎯',
-    'Hopeaa ei voi sulattaa kullaksi ilman tulta. Tulta on luvassa. 🔥',
-    'Oraakkeli kuiskaa: kiinni on. 📈',
+    'Johtaja nukkuu, mestari herää — mutta ensin pitäisi löytää oikotie. Oraakkeli tietää sen. 🗺️',
+    'Niin lähellä, että oraakkeli melkein myönsi olevansa väärässä. Melkein. 🎯',
+    'Hopeamitali on tulos. Kultamitali on päämäärä. Eroa on yksi sijoitus. 🔥',
+    'Oraakkeli kuiskaa: kiinni on. Mutta se on kuiskannut ennenkin. Eikä aina oikeassa. 📈',
   ],
   // Sija 3
   [
-    'Pronssista kultaan on lyhyempi matka kuin luulet. Oraakkeli tietää oikotiet. ✨',
-    'Tilanne on avoin kuin stadionin portit ennen loppuottelua. 🏟️',
-    'Kolmantena oleminen on aliarvostettua. Toistaiseksi. 🧐',
-    'Oraakkeli näkee potentiaalia. Paljon potentiaalia. 📊',
+    'Kolmas sija kuulostaa hyvältä. Ei kuitenkaan niin hyvältä kuin ensimmäinen. Oraakkeli muistuttaa. ✨',
+    'Pronssista kultaan on lyhyempi matka kuin luulet. Mutta ei ole oikotietä. 🏟️',
+    'Oraakkeli näkee potentiaalia. Paljon potentiaalia. Toistaiseksi vain potentiaalia. 📊',
+    'Tilanne elää. Oraakkeli elää sen mukana. Jännittyneenä mutta neutraalina. 🧐',
   ],
   // Sija 4
   [
-    'Neljäntenä et voita mitään — mutta kisa on pitkä ja oraakkeli on kärsivällinen. ⏳',
-    'Puolimatkan krouvissa pysähtyminen ei ole häviämistä. Vielä. 🛑',
-    'Turnauksen kulku on arvaamaton. Oraakkeli arvaa silti. Se arvaa: ei vielä. 🤔',
-    'Mahdollisuuksia on vielä paljon. Lähinnä muille. 😬',
+    'Neljäs sija: historiallinen saavutus siinä mielessä, että kukaan ei muista sitä. ⏳',
+    'Oraakkeli katsoo sinua. Sitten katsoo taulukkoa. Sitten sinua uudelleen. Se ei sano mitään. 🤔',
+    'Puolimatkan krouvissa pysähtyminen ei ole häviämistä. Se on kuitenkin aika lähellä sitä. 🛑',
+    'Turnaus on auki. Oraakkeli on avoin. Todennäköisyydet eivät ole. 😬',
   ],
   // Sija 5
   [
-    'Oraakkeli yrittää löytää positiivista. Se jatkaa etsimistä. 🔍',
-    'Veikkauksessa on rohkeutta. Rohkeus ei kuitenkaan aina palkitse. 🫡',
-    'Viides sija on historiallisesti... olemassa. 📚',
-    'Älä anna periksi. Oraakkeli ei anna periksi sinunkaan puolesta (jostain syystä). 💪',
+    'Oraakkeli yrittää löytää jotain positiivista. Se on edelleen etsinnässä. 🔍',
+    'Viides sija on aliarvostettua. Oraakkeli yrittää keksiä miksi. Se ei onnistu. 📚',
+    'Rohkeutta tarvitaan. Rohkeutta ei kuitenkaan palkita aina. Tai usein. 🫡',
+    'Älä anna periksi. Oraakkeli ei anna periksi sinunkaan puolesta. Syistä, joita se ei avaa. 💪',
   ],
   // Sija 6
   [
-    'Oraakkeli vilkuilee sinuun myötätuntoisesti. 🙏',
-    'Kuusi on onnennumero jossain kulttuurissa. Oraakkeli ei muista missä. 🌍',
-    'Turnaus on vielä kesken. Tämä on ainoa lohduttava asia mitä oraakkeli löysi. 📉',
-    'Rohkea veikkaus. Rohkea. Siis todella rohkea. 🫣',
+    'Oraakkeli katsoo tilannettasi. Sitten sulkee silmänsä. Sitten avaa ne uudelleen. Tilanne ei muutu. 🙏',
+    'Kuusi on onnennumero jossain kulttuurissa. Oraakkeli ei muista missä. Ehkä Saturnuksella. 🌍',
+    'Turnaus on vielä kesken. Tämä on ainoa positiivinen asia mitä oraakkeli löysi. Ainut. 📉',
+    'Rohkea veikkaus. Todella rohkea. Absurdisti rohkea. Oraakkeli kunnioittaa sitä jollain tasolla. 🫣',
   ],
   // Sija 7+ — viimeinen
   [
-    'Oraakkeli on nähnyt paljon. Tämä on uusi kokemus. 😶',
-    'Häviäminen on opettavaista. Oraakkeli toivoo, että opit paljon. 📖',
-    'Ehkä seuraavissa kisoissa. Tai yliseuraavissa. 😅',
-    'Oraakkeli lähettää moraalisen tuen. Se on ilmaista toisin kuin voittaminen. 💌',
+    'Oraakkeli on laskenut 847 eri skenaariota. Yhdessäkään ei voiteta. 😶',
+    'Häviäminen on opettavaista. Oraakkeli toivoo, että opit paljon. Todella paljon. 📖',
+    'Ehkä seuraavissa kisoissa. Tai yliseuraavissa. Tai vuoden 2038 kisoissa. 😅',
+    'Oraakkeli ei ole ikinä nähnyt tätä. Se kirjoittaa siitä tutkielman. 🔬',
+    'Veikkauksesi on taiteellinen kokonaisuus. Väärässä oleminen on oma lajiaan. 🎨',
+  ],
+];
+
+const ROAST_TEXTS_BY_RANK = [
+  [], // Sija 1: ei naljailua
+  // Sija 2
+  [
+    'Niin lähellä, niin kaukana. Kuin finaalissa maalin edessä — ilman palloa.',
+    'Johtajan selkä on siinä. Juokse nopeammin tai katso kauempaa.',
+    'Hopea on hieno. Mutta oraakkeli tietää mitä haluat oikeasti.',
+  ],
+  // Sija 3
+  [
+    'Pronssi on upeaa. Mutta se ei maksa laskuja yhtä hyvin kuin kulta.',
+    'Oraakkeli näkee sinussa potentiaalia. Se vain ei tiedä mihin potentiaali johti.',
+    'Kolmantena oleminen on aliarvostettua. Myös tässä kisassa.',
+  ],
+  // Sija 4
+  [
+    'Ei mitalille, ei hyvää selitystä. Oraakkeli odottaa molempia.',
+    'Neljännellä sijalla istuessa on aikaa pohtia, missä meni pieleen. Oraakkeli ehdottaa: kaikkialla.',
+    'Tulos on tulos. Tämä tulos ei juuri lohduta.',
+  ],
+  // Sija 5
+  [
+    'Viides. Viiden joukkueen joukossa olisi jo mitali. Oraakkeli laskee pelaajia: kymmenen.',
+    'Oraakkeli yritti löytää jotain tsemppaavaa sanottavaa. Se löysi: turnaus on vielä kesken.',
+    'Veikkauksesi oli rohkea. Rohkeus on yleensä hyvä asia. Yleensä.',
+  ],
+  // Sija 6
+  [
+    'Kuudennella sijalla on sentään nimi. Eikä se ole "voittaja". Oraakkeli pahoittelee.',
+    'Oraakkeli analysoi veikkauksesi 12 minuuttia. Se ei tiedä mitä sanoa. Se ei yleensä vaikene.',
+    'Lähellä häntää. Ei aivan hännällä. Oraakkeli ei tiedä onko se lohdullista vai ei.',
+  ],
+  // Sija 7+ — viimeinen
+  [
+    'Oraakkeli haluaa lähettää lohdun. Mutta se ei löydä sopivaa lausetta. Eikä sopivaa emojia.',
+    'Historiallinen suoritus. Oraakkeli kirjaa sen ylös. Varoituksena tuleville sukupolville.',
+    'Tämä ei ole häviämistä. Tämä on aktiivista osallistumista muiden voittoon.',
+    'Oraakkeli on nähyt paljon. Tämä ylitti odotukset. Alaspäin.',
   ],
 ];
 
 function pickText(rankIndex) {
   const options = FUN_TEXTS_BY_RANK[Math.min(rankIndex, FUN_TEXTS_BY_RANK.length - 1)];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+function pickRoast(rankIndex) {
+  const options = ROAST_TEXTS_BY_RANK[Math.min(rankIndex, ROAST_TEXTS_BY_RANK.length - 1)];
+  if (!options || options.length === 0) return null;
   return options[Math.floor(Math.random() * options.length)];
 }
 
@@ -99,6 +148,7 @@ export default async function handler(req, context) {
         // Normalisoidaan välille 10–100 jotta kukaan ei ole 0% lohkovaiheen alussa
         normalizedScore: Math.round(10 + 90 * ((r.score - minScore) / scoreRange)),
         text: pickText(i),
+        roastText: pickRoast(i),
       })),
       leader: ranking[0]?.name,
       lastUpdated: new Date().toISOString(),

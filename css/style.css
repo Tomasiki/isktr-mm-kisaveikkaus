@@ -142,6 +142,17 @@ main.container { padding-top: 28px; padding-bottom: 48px; }
   opacity: .8;
 }
 
+.oracle-roast {
+  font-size: 0.8rem;
+  opacity: 0.65;
+  margin-top: 14px;
+  font-style: italic;
+  color: #fde68a;
+  max-width: 420px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .oracle-updated {
   font-size: 0.7rem;
   opacity: .5;
@@ -278,6 +289,23 @@ td.loading { text-align: center; color: var(--text-muted); padding: 28px; }
   text-transform: none;
   opacity: 0.75;
   padding: 6px 4px;
+}
+
+.max-pts-row {
+  background: #fffbeb;
+  border-bottom: 2px solid var(--gold);
+}
+
+.max-pts-cell {
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--gold);
+}
+
+.max-pts-label {
+  font-weight: 700 !important;
+  color: var(--gold) !important;
 }
 
 .team-chip {

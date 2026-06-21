@@ -63,20 +63,15 @@ async function fetchFromApi() {
 function parseResults(standings, matchesData) {
   const results = emptyResults();
 
-  // Lohkotaulukot + joukkueiden lohkovaiheen form-data
+  // 1. Lohkotaulukot + joukkueiden lohkovaiheen form-data
   for (const group of (standings.standings || [])) {
     const letter = (group.group || '').replace('GROUP_', '');
     if (!letter || !group.table?.length) continue;
     const allPlayed = group.table.every(r => r.playedGames >= 3);
-    if (allPlayed) {
-      results.groups[letter] = {
-        winner: group.table[0].team.name,
-        complete: true,
-      };
-    } else {
-      results.groups[letter] = { winner: null, complete: false };
-    }
-    // Tallenna jokaisen joukkueen lohkovaihedata form-laskentaa varten
+    results.groups[letter] = {
+      winner: allPlayed ? group.table[0].team.name : null,
+      complete: allPlayed,
+    };
     for (const row of group.table) {
       if (!row.team?.name || row.playedGames === 0) continue;
       results.groupStandings[row.team.name] = {
@@ -86,21 +81,34 @@ function parseResults(standings, matchesData) {
         goalDiff: row.goalDifference ?? 0,
         goalsFor: row.goalsFor ?? 0,
       };
+      results.teamGroup[row.team.name] = letter;
     }
   }
 
-  // Karsinnat
+  // 2. Karsinnat: käy kaikki ottelut läpi kerralla
+  const knockoutParticipants = new Set();
   for (const match of (matchesData.matches || [])) {
+    const round = match.stage;
+    const isKnockout = STAGE_MAP[round] || round === 'ROUND_OF_32' || round === 'LAST_32';
+    if (!isKnockout) continue;
+
+    knockoutParticipants.add(match.homeTeam.name);
+    knockoutParticipants.add(match.awayTeam.name);
+
+    // Tulevat ottelut bracket-laskentaa varten
+    if (match.status === 'SCHEDULED' || match.status === 'TIMED') {
+      results.bracket.push({ round, team1: match.homeTeam.name, team2: match.awayTeam.name });
+    }
+
     if (match.status !== 'FINISHED') continue;
-    const target = STAGE_MAP[match.stage];
+    const target = STAGE_MAP[round];
     if (!target) continue;
 
     const scoreWinner = match.score?.winner;
     if (!scoreWinner || scoreWinner === 'DRAW') continue;
 
-    const winnerName = scoreWinner === 'HOME_TEAM'
-      ? match.homeTeam.name
-      : match.awayTeam.name;
+    const winnerName = scoreWinner === 'HOME_TEAM' ? match.homeTeam.name : match.awayTeam.name;
+    const loserName  = scoreWinner === 'HOME_TEAM' ? match.awayTeam.name : match.homeTeam.name;
 
     if (target === 'final') {
       results.winner = winnerName;
@@ -109,10 +117,23 @@ function parseResults(standings, matchesData) {
     } else {
       if (!results[target].includes(winnerName)) results[target].push(winnerName);
     }
+
+    // Pelin hävinnyt on eliminoitu
+    if (!results.eliminated.includes(loserName)) results.eliminated.push(loserName);
   }
 
-  // Merkitse vaiheet valmiiksi
-  results.stagesComplete.groups = Object.values(results.groups).every(g => g.complete);
+  // 3. Lohkovaiheesta karsiutuneet: pelasi lohkon mutta ei näy karsinnoissa
+  for (const teamName of Object.keys(results.groupStandings)) {
+    if (knockoutParticipants.has(teamName)) continue;
+    const letter = results.teamGroup[teamName];
+    if (letter && results.groups[letter]?.complete) {
+      if (!results.eliminated.includes(teamName)) results.eliminated.push(teamName);
+    }
+  }
+
+  // 4. Merkitse vaiheet valmiiksi
+  const groupEntries = Object.values(results.groups);
+  results.stagesComplete.groups = groupEntries.length > 0 && groupEntries.every(g => g.complete);
   results.stagesComplete.top16  = results.top16.length >= 16;
   results.stagesComplete.top8   = results.top8.length  >= 8;
   results.stagesComplete.top4   = results.top4.length  >= 4;
@@ -127,8 +148,11 @@ function emptyResults() {
   return {
     groups: {},
     groupStandings: {},
+    teamGroup: {},
     top16: [], top8: [], top4: [], top2: [],
     winner: null,
+    eliminated: [],
+    bracket: [],
     stagesComplete: { groups: false, top16: false, top8: false, top4: false, top2: false, final: false },
     lastUpdated: null,
   };

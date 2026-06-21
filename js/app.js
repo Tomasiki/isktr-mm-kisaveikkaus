@@ -1,6 +1,6 @@
 import { participants } from '/data/predictions.mjs';
 import { teamToEnglish, teamToFinnish } from '/data/teams.mjs';
-import { calculateScore, scoreBreakdown, tiebreaker } from '/js/scoring.js';
+import { calculateScore, scoreBreakdown, tiebreaker, calculateMaxScore } from '/js/scoring.js';
 
 const EMPTY_RESULTS = {
   groups: {}, top16: [], top8: [], top4: [], top2: [], winner: null,
@@ -59,6 +59,19 @@ function renderOracle(oracle, results) {
   updatedEl.textContent = oracle.lastUpdated
     ? 'Päivitetty ' + formatTime(oracle.lastUpdated)
     : '';
+
+  // Viimeisen pelaajan naljailu
+  const last = oracle.ranking[oracle.ranking.length - 1];
+  if (last?.roastText) {
+    let roastEl = document.getElementById('oracle-roast');
+    if (!roastEl) {
+      roastEl = document.createElement('p');
+      roastEl.id = 'oracle-roast';
+      roastEl.className = 'oracle-roast';
+      updatedEl.before(roastEl);
+    }
+    roastEl.textContent = `💬 ${last.name}: "${last.roastText}"`;
+  }
 }
 
 function buildLocalRanking(results) {
@@ -131,20 +144,16 @@ function renderPredictions(results) {
   const top2Set  = new Set(results.top2  || []);
   const winnerEn = results.winner;
 
-  // Kerää kaikki eliminoidut joukkueet (joita ei ole missään jatkovaiheessa)
-  const eliminated = new Set();
-  // Joukkue on eliminoitu lohkovaiheessa jos lohkovaihe on ohi eikä se ole top32:ssa
-  // Yksinkertaistettu: jos jokin vaihe on täynnä, eliminoidut voidaan päätellä
+  const eliminatedSet = new Set(results.eliminated || []);
 
   function teamStatus(finnishName) {
     const en = teamToEnglish(finnishName);
     if (winnerEn && en === winnerEn) return 'advancing';
     if (top2Set.has(en)) return 'advancing';
-    if (top4Set.has(en)) return top4Set.size >= 4 ? 'advancing' : 'advancing';
+    if (top4Set.has(en)) return 'advancing';
     if (top8Set.has(en)) return 'advancing';
     if (top16Set.has(en)) return 'advancing';
-    // Jos jokin vaihe on jo täynnä ja joukkue ei ole siellä → eliminoitu
-    if (results.stagesComplete?.top16 && !top16Set.has(en)) return 'eliminated';
+    if (eliminatedSet.has(en)) return 'eliminated';
     return 'unknown';
   }
 
@@ -171,6 +180,13 @@ function renderPredictions(results) {
 
   // Body
   const rows = [];
+
+  // Maksimipisteet-rivi (ylin)
+  const maxCells = participants.map(p => {
+    const max = calculateMaxScore(p, results);
+    return `<td class="max-pts-cell">${max}</td>`;
+  }).join('');
+  rows.push(`<tr class="max-pts-row"><td class="row-header max-pts-label">Maksimipisteet</td>${maxCells}</tr>`);
 
   sections.forEach(({ label, key }) => {
     // Otsikkorivi: nimi vasemmalla, pienellä pelaajan nimi per sarake

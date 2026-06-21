@@ -71,6 +71,90 @@ export function scoreBreakdown(participant, results) {
   };
 }
 
+export function calculateMaxScore(participant, results) {
+  const eliminatedSet = new Set(results.eliminated || []);
+  const teamGroupMap  = results.teamGroup || {};
+
+  const isBlocked = (finnishName, stage) => {
+    const enName = teamToEnglish(finnishName);
+    if (eliminatedSet.has(enName)) return true;
+    if (stage === 'top16' && results.stagesComplete?.top16 && !(results.top16 || []).includes(enName)) return true;
+    if (stage === 'top8'  && results.stagesComplete?.top8  && !(results.top8  || []).includes(enName)) return true;
+    if (stage === 'top4'  && results.stagesComplete?.top4  && !(results.top4  || []).includes(enName)) return true;
+    if (stage === 'top2'  && results.stagesComplete?.top2  && !(results.top2  || []).includes(enName)) return true;
+    if (stage === 'winner' && results.winner && results.winner !== enName) return true;
+    return false;
+  };
+
+  let max = 0;
+
+  // Lohkovoittajat (per lohko)
+  for (const team of (participant.groupWinners || [])) {
+    const enName = teamToEnglish(team);
+    const letter = teamGroupMap[enName];
+    if (letter && results.groups?.[letter]?.complete) {
+      if (results.groups[letter].winner === enName) max += 1;
+    } else if (!eliminatedSet.has(enName)) {
+      max += 1;
+    }
+  }
+
+  // Top16 (1 pt each)
+  for (const team of (participant.top16 || [])) {
+    if (!isBlocked(team, 'top16')) max += 1;
+  }
+
+  // Top8, top4, top2 — bracket-konfliktit huomioiden
+  const stageConfigs = [
+    { key: 'top8', pts: 2, rounds: ['ROUND_OF_16', 'LAST_16'] },
+    { key: 'top4', pts: 3, rounds: ['QUARTER_FINALS'] },
+    { key: 'top2', pts: 4, rounds: ['SEMI_FINALS'] },
+  ];
+
+  for (const { key, pts, rounds } of stageConfigs) {
+    const candidates = new Map(); // enName → futureWeight
+    for (const team of (participant[key] || [])) {
+      if (!isBlocked(team, key)) {
+        const enName = teamToEnglish(team);
+        candidates.set(enName, calcFutureWeight(enName, key, participant));
+      }
+    }
+
+    const removed = new Set();
+    for (const m of (results.bracket || [])) {
+      if (!rounds.includes(m.round)) continue;
+      if (candidates.has(m.team1) && candidates.has(m.team2)) {
+        const w1 = candidates.get(m.team1), w2 = candidates.get(m.team2);
+        removed.add(w1 >= w2 ? m.team2 : m.team1);
+      }
+    }
+
+    for (const enName of candidates.keys()) {
+      if (!removed.has(enName)) max += pts;
+    }
+  }
+
+  // Voittaja (5 pt)
+  if (participant.winner && !isBlocked(participant.winner, 'winner')) max += 5;
+
+  return max;
+}
+
+function calcFutureWeight(enName, fromStage, participant) {
+  const order = ['top8', 'top4', 'top2', 'winner'];
+  const pts   = { top8: 2, top4: 3, top2: 4, winner: 5 };
+  let w = 0, past = false;
+  for (const s of order) {
+    if (!past) { if (s === fromStage) past = true; continue; }
+    if (s === 'winner') {
+      if (participant.winner && teamToEnglish(participant.winner) === enName) w += 5;
+    } else {
+      if ((participant[s] || []).some(t => teamToEnglish(t) === enName)) w += pts[s];
+    }
+  }
+  return w;
+}
+
 // Tasatilanne-vertailu: palauttaa -1/0/1 (a < b, tasa, a > b järjestyksessä)
 export function tiebreaker(a, b, results) {
   const top2  = new Set(results.top2  || []);
