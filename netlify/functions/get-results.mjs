@@ -64,7 +64,9 @@ function parseResults(standings, matchesData) {
   const results = emptyResults();
 
   // 1. Lohkotaulukot + joukkueiden lohkovaiheen form-data
+  // Käsitellään vain TOTAL-standings (football-data.org palauttaa myös HOME ja AWAY)
   for (const group of (standings.standings || [])) {
+    if (group.type && group.type !== 'TOTAL') continue;
     const letter = (group.group || '').replace('GROUP_', '');
     if (!letter || !group.table?.length) continue;
     const allPlayed = group.table.every(r => r.playedGames >= 3);
@@ -86,16 +88,13 @@ function parseResults(standings, matchesData) {
 
     // Neljäs sija = varma eliminointi jos ei voi enää edetä
     if (group.table.length === 4) {
-      const r3 = group.table[2];
       const r4 = group.table[3];
       // 3 peliä pelannut viimeinen → eliminoitu
       if (r4?.team?.name && r4.playedGames >= 3) {
         if (!results.eliminated.includes(r4.team.name)) results.eliminated.push(r4.team.name);
       }
-      // 2 peliä pelannut: max-pisteet (nykyiset + 3) jää alle 3. sijan pisteiden
-      // Pisteet eivät koskaan pienene → 3. sija saavuttamaton → jää varmasti 4:nneksi
-      if (r4?.team?.name && r4.playedGames === 2 && r3?.points != null &&
-          (r4.points ?? 0) + 3 < r3.points) {
+      // 0 pistettä 2 pelissä = 2 tappiota = ei voi edetä (max 3 pts ei riitä 2026 MM:ssa)
+      if (r4?.team?.name && r4.playedGames === 2 && r4.points === 0) {
         if (!results.eliminated.includes(r4.team.name)) results.eliminated.push(r4.team.name);
       }
     }
