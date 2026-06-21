@@ -59,45 +59,22 @@ const FUN_TEXTS_BY_RANK = [
   ],
 ];
 
-const ROAST_TEXTS_BY_RANK = [
-  [], // Sija 1: ei naljailua
-  // Sija 2
-  [
-    'Niin lähellä, niin kaukana. Kuin finaalissa maalin edessä — ilman palloa.',
-    'Johtajan selkä on siinä. Juokse nopeammin tai katso kauempaa.',
-    'Hopea on hieno. Mutta oraakkeli tietää mitä haluat oikeasti.',
-  ],
-  // Sija 3
-  [
-    'Pronssi on upeaa. Mutta se ei maksa laskuja yhtä hyvin kuin kulta.',
-    'Oraakkeli näkee sinussa potentiaalia. Se vain ei tiedä mihin potentiaali johti.',
-    'Kolmantena oleminen on aliarvostettua. Myös tässä kisassa.',
-  ],
-  // Sija 4
-  [
-    'Ei mitalille, ei hyvää selitystä. Oraakkeli odottaa molempia.',
-    'Neljännellä sijalla istuessa on aikaa pohtia, missä meni pieleen. Oraakkeli ehdottaa: kaikkialla.',
-    'Tulos on tulos. Tämä tulos ei juuri lohduta.',
-  ],
-  // Sija 5
-  [
-    'Viides. Viiden joukkueen joukossa olisi jo mitali. Oraakkeli laskee pelaajia: kymmenen.',
-    'Oraakkeli yritti löytää jotain tsemppaavaa sanottavaa. Se löysi: turnaus on vielä kesken.',
-    'Veikkauksesi oli rohkea. Rohkeus on yleensä hyvä asia. Yleensä.',
-  ],
-  // Sija 6
-  [
-    'Kuudennella sijalla on sentään nimi. Eikä se ole "voittaja". Oraakkeli pahoittelee.',
-    'Oraakkeli analysoi veikkauksesi 12 minuuttia. Se ei tiedä mitä sanoa. Se ei yleensä vaikene.',
-    'Lähellä häntää. Ei aivan hännällä. Oraakkeli ei tiedä onko se lohdullista vai ei.',
-  ],
-  // Sija 7+ — viimeinen
-  [
-    'Oraakkeli haluaa lähettää lohdun. Mutta se ei löydä sopivaa lausetta. Eikä sopivaa emojia.',
-    'Historiallinen suoritus. Oraakkeli kirjaa sen ylös. Varoituksena tuleville sukupolville.',
-    'Tämä ei ole häviämistä. Tämä on aktiivista osallistumista muiden voittoon.',
-    'Oraakkeli on nähyt paljon. Tämä ylitti odotukset. Alaspäin.',
-  ],
+const STRONG_ROAST_TEXTS = [
+  'Oraakkeli tutki veikkauksesi ja kehotti hakemaan uuden harrastuksen.',
+  'Arpomalla olisit pärjännyt paremmin. Kolme kertaa peräkkäin.',
+  'Joku sanoi "kaikki voi vielä tapahtua". Oraakkeli sanoo: ei sinun kohdallasi.',
+  'Statistiikka toteaa: tämä veikkaus oli tilastollinen anomalia. Alaspäin.',
+  'Oraakkeli mietti kauan mitä sanoa. Päätti olla rehellinen: tarvitset apua.',
+  'Lohkovaihe meni loistavasti — jos lasketaan toisin päin.',
+  'Potentiaalisi on rajaton. Nimenomaan sinne alaspäin.',
+  'Muut optimoivat veikkauksensa. Mitä sinä optimoit?',
+  'Kisaveikkauksen pohjalle pääseminen vaatii omaa lahjakkuuttaan. Oraakkeli myöntää sen.',
+  'Oraakkeli on nähnyt paljon. Tämä ylitti odotukset — alaspäin.',
+  'Tämä ei ole häviämistä. Tämä on aktiivista osallistumista muiden voittoon.',
+  'Veikkauksesi oli rohkea teko. Väärässä oleminen omana lajiaan.',
+  'Oraakkeli avasi veikkauksesi. Sulki sen. Avasi uudelleen. Ei uskonut silmiään.',
+  'Jos haluaisit voittaa, sinun pitäisi olla joku muu. Oraakkeli pahoittelee.',
+  'Oraakkeli käski minun kertoa: jatka veikkaamista. On hauskaa katsoa vierestä.',
 ];
 
 function pickText(rankIndex) {
@@ -105,10 +82,14 @@ function pickText(rankIndex) {
   return options[Math.floor(Math.random() * options.length)];
 }
 
-function pickRoast(rankIndex) {
-  const options = ROAST_TEXTS_BY_RANK[Math.min(rankIndex, ROAST_TEXTS_BY_RANK.length - 1)];
-  if (!options || options.length === 0) return null;
-  return options[Math.floor(Math.random() * options.length)];
+function pickBottomRoast(ranking) {
+  const n = ranking.length;
+  if (n < 1) return null;
+  const poolSize = Math.min(4, n);
+  const idx = n - 1 - Math.floor(Math.random() * poolSize);
+  const target = ranking[idx];
+  const text = STRONG_ROAST_TEXTS[Math.floor(Math.random() * STRONG_ROAST_TEXTS.length)];
+  return { name: target.name, text };
 }
 
 export default async function handler(req, context) {
@@ -148,9 +129,9 @@ export default async function handler(req, context) {
         // Normalisoidaan välille 10–100 jotta kukaan ei ole 0% lohkovaiheen alussa
         normalizedScore: Math.round(10 + 90 * ((r.score - minScore) / scoreRange)),
         text: pickText(i),
-        roastText: pickRoast(i),
       })),
       leader: ranking[0]?.name,
+      roastTarget: pickBottomRoast(ranking),
       lastUpdated: new Date().toISOString(),
       dataSource: Object.keys(teamStrengths).length > 0 ? 'live' : 'fallback',
     };

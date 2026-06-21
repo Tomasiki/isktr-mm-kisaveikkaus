@@ -60,9 +60,9 @@ function renderOracle(oracle, results) {
     ? 'Päivitetty ' + formatTime(oracle.lastUpdated)
     : '';
 
-  // Viimeisen pelaajan naljailu
-  const last = oracle.ranking[oracle.ranking.length - 1];
-  if (last?.roastText) {
+  // Satunnaisen bottom-4 pelaajan naljailu
+  const roast = oracle.roastTarget;
+  if (roast?.name && roast?.text) {
     let roastEl = document.getElementById('oracle-roast');
     if (!roastEl) {
       roastEl = document.createElement('p');
@@ -70,7 +70,7 @@ function renderOracle(oracle, results) {
       roastEl.className = 'oracle-roast';
       updatedEl.before(roastEl);
     }
-    roastEl.textContent = `💬 ${last.name}: "${last.roastText}"`;
+    roastEl.textContent = `💬 ${roast.name}: "${roast.text}"`;
   }
 }
 

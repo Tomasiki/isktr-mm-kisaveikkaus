@@ -84,13 +84,19 @@ function parseResults(standings, matchesData) {
       results.teamGroup[row.team.name] = letter;
     }
 
-    // Neljäs sija 3 pelin jälkeen = varma eliminointi (4. sija ei koskaan jatka)
+    // Neljäs sija = varma eliminointi jos ei voi enää edetä
     if (group.table.length === 4) {
-      const lastRow = group.table[3];
-      if (lastRow?.team?.name && lastRow.playedGames >= 3) {
-        if (!results.eliminated.includes(lastRow.team.name)) {
-          results.eliminated.push(lastRow.team.name);
-        }
+      const r3 = group.table[2];
+      const r4 = group.table[3];
+      // 3 peliä pelannut viimeinen → eliminoitu
+      if (r4?.team?.name && r4.playedGames >= 3) {
+        if (!results.eliminated.includes(r4.team.name)) results.eliminated.push(r4.team.name);
+      }
+      // 2 peliä pelannut: max-pisteet (nykyiset + 3) jää alle 3. sijan pisteiden
+      // Pisteet eivät koskaan pienene → 3. sija saavuttamaton → jää varmasti 4:nneksi
+      if (r4?.team?.name && r4.playedGames === 2 && r3?.points != null &&
+          (r4.points ?? 0) + 3 < r3.points) {
+        if (!results.eliminated.includes(r4.team.name)) results.eliminated.push(r4.team.name);
       }
     }
   }
