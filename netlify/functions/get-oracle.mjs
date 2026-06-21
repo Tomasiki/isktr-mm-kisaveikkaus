@@ -120,7 +120,7 @@ export default async function handler(req, context) {
     try { cached = await store.get('oracle', { type: 'json' }); } catch {}
     if (cached?.lastUpdated) {
       const age = Date.now() - new Date(cached.lastUpdated).getTime();
-      if (age < CACHE_TTL_MS) return Response.json(cached);
+      if (age < CACHE_TTL_MS) return Response.json(cached, { headers: { 'Cache-Control': 'no-store' } });
     }
 
     // Hae tulokset (sisäinen kutsu)
@@ -156,7 +156,7 @@ export default async function handler(req, context) {
     };
 
     try { await store.set('oracle', JSON.stringify(result)); } catch {}
-    return Response.json(result);
+    return Response.json(result, { headers: { 'Cache-Control': 'no-store' } });
 
   } catch (err) {
     console.error('get-oracle error:', err);

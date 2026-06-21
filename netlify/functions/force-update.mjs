@@ -11,14 +11,18 @@ export default async function handler(req, context) {
   }
 
   try {
-    // Tyhjennä cache jotta get-results hakee tuoreimman datan
+    // Tyhjennä molemmat välimuistit
     const store = getStore('tournament-data');
     await store.delete('results');
     await store.delete('oracle');
 
-    // Hae tuoreet tulokset suoraan
-    const res = await fetch(new URL('/api/get-results', req.url));
-    const data = res.ok ? await res.json() : { error: 'fetch failed' };
+    // Hae tuoreet tulokset JA uusi oraakkeli heti
+    const base = new URL(req.url);
+    const [resultsRes, oracleRes] = await Promise.all([
+      fetch(new URL('/api/get-results', base)),
+      fetch(new URL('/api/get-oracle', base)),
+    ]);
+    const data = resultsRes.ok ? await resultsRes.json() : { error: 'fetch failed' };
 
     return Response.json(data);
   } catch (err) {
