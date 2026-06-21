@@ -83,6 +83,16 @@ function parseResults(standings, matchesData) {
       };
       results.teamGroup[row.team.name] = letter;
     }
+
+    // Neljäs sija 3 pelin jälkeen = varma eliminointi (4. sija ei koskaan jatka)
+    if (group.table.length === 4) {
+      const lastRow = group.table[3];
+      if (lastRow?.team?.name && lastRow.playedGames >= 3) {
+        if (!results.eliminated.includes(lastRow.team.name)) {
+          results.eliminated.push(lastRow.team.name);
+        }
+      }
+    }
   }
 
   // 2. Karsinnat: käy kaikki ottelut läpi kerralla
