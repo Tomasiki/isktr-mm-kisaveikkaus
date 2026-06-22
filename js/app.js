@@ -1,5 +1,5 @@
 import { participants } from '/data/predictions.mjs';
-import { teamToEnglish, teamToFinnish } from '/data/teams.mjs';
+import { teamToEnglish, teamToFinnish, toEnglish } from '/data/teams.mjs';
 import { calculateScore, scoreBreakdown, tiebreaker, calculateMaxScore } from '/js/scoring.js';
 
 const EMPTY_RESULTS = {
@@ -231,6 +231,35 @@ function initAdmin() {
     }
   });
 
+  // Eliminoitujen hallinta
+  const elimInput  = document.getElementById('elim-input');
+  const elimAddBtn = document.getElementById('elim-add-btn');
+
+  if (elimAddBtn) {
+    elimAddBtn.addEventListener('click', async () => {
+      const fi = elimInput?.value.trim();
+      if (!fi) return;
+      const en = teamToEnglish(fi);
+      if (!elimTeams.includes(en)) elimTeams.push(en);
+      if (elimInput) elimInput.value = '';
+      await saveEliminated();
+    });
+  }
+
+  // Nimiopas
+  const guide = document.getElementById('elim-name-guide');
+  if (guide) {
+    const primary = Object.entries(toEnglish).filter(([fi]) =>
+      !['Equador', 'Alankomaat', 'Mexico', 'Croatia'].includes(fi)
+    );
+    guide.innerHTML = primary
+      .sort(([a], [b]) => a.localeCompare(b, 'fi'))
+      .map(([fi, en]) => `<span><b>${fi}</b> → ${en}</span>`)
+      .join('');
+  }
+
+  loadEliminated();
+
   btn.addEventListener('click', async () => {
     const pw = pwInput.value.trim();
     if (!pw) { showStatus(statusEl, 'Syötä salasana.', 'error'); return; }
@@ -256,6 +285,67 @@ function initAdmin() {
       btn.textContent = '🔄 Pakota päivitys nyt';
     }
   });
+}
+
+// ── Eliminoitujen hallinta (admin) ───────────────────
+let elimTeams = [];
+
+async function loadEliminated() {
+  const r = await fetch('/api/eliminated-admin');
+  elimTeams = r.ok ? await r.json() : [];
+  renderElimList();
+
+  const autoEl = document.getElementById('elim-auto-list');
+  if (autoEl) {
+    try {
+      const res = await fetch('/api/get-results');
+      const data = res.ok ? await res.json() : {};
+      const autoOnly = (data.eliminated || []).filter(t => !elimTeams.includes(t));
+      autoEl.innerHTML = autoOnly.length > 0
+        ? autoOnly.map(t => `<span style="margin-right:10px">${t}</span>`).join('')
+        : '<span>Ei havaittu automaattisesti.</span>';
+    } catch {
+      autoEl.textContent = 'Ei saatavilla.';
+    }
+  }
+}
+
+function renderElimList() {
+  const elimList = document.getElementById('elim-list');
+  if (!elimList) return;
+  if (elimTeams.length === 0) {
+    elimList.innerHTML = '<p style="font-size:.82rem;color:var(--text-muted)">Ei manuaalisesti lisättyjä.</p>';
+    return;
+  }
+  elimList.innerHTML = elimTeams.map(t =>
+    `<div style="display:flex;align-items:center;gap:8px;margin:4px 0">
+      <span style="flex:1;font-size:.9rem">${t}</span>
+      <button class="btn" style="padding:2px 8px;font-size:.8rem" onclick="removeElim('${t.replace(/'/g, "\\'")}')">✕</button>
+    </div>`
+  ).join('');
+}
+
+window.removeElim = async (team) => {
+  elimTeams = elimTeams.filter(t => t !== team);
+  await saveEliminated();
+};
+
+async function saveEliminated() {
+  const pwInput = document.getElementById('admin-password');
+  const elimStatus = document.getElementById('elim-status');
+  const pw = pwInput?.value.trim();
+  if (!pw) { showStatus(elimStatus, 'Anna salasana ensin.', 'error'); return; }
+  const r = await fetch('/api/eliminated-admin', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': pw },
+    body: JSON.stringify({ teams: elimTeams }),
+  });
+  if (r.ok) {
+    showStatus(elimStatus, '✓ Tallennettu!', 'success');
+    renderElimList();
+  } else {
+    showStatus(elimStatus, r.status === 401 ? 'Väärä salasana.' : 'Virhe tallennuksessa.', 'error');
+  }
 }
 
 function showStatus(el, msg, type) {

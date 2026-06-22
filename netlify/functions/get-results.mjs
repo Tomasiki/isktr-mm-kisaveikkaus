@@ -57,7 +57,20 @@ async function fetchFromApi() {
   const standingsData = standingsRes.ok ? await standingsRes.json() : {};
   const matchesData   = matchesRes.ok  ? await matchesRes.json()   : {};
 
-  return parseResults(standingsData, matchesData);
+  const fresh = parseResults(standingsData, matchesData);
+
+  // Yhdistä manuaalisesti lisätyt eliminoidut joukkueet
+  try {
+    const store = getStore('tournament-data');
+    const manual = await store.get('manual-eliminated', { type: 'json' });
+    if (Array.isArray(manual)) {
+      for (const t of manual) {
+        if (!fresh.eliminated.includes(t)) fresh.eliminated.push(t);
+      }
+    }
+  } catch {}
+
+  return fresh;
 }
 
 function parseResults(standings, matchesData) {
