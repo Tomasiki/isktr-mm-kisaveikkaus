@@ -1,4 +1,17 @@
 import { getStore } from '@netlify/blobs';
+import { toFinnish, toEnglish } from '../../data/teams.mjs';
+
+// Normaloi API:n joukkuenimi kanoniseen muotoon jota frontend käyttää.
+// Esim. "Turkey" → toFinnish → "Turkki" → toEnglish → "Türkiye"
+function canonicalize(apiName) {
+  if (!apiName) return apiName;
+  const fi = toFinnish[apiName];
+  if (fi) {
+    const canonical = toEnglish[fi];
+    if (canonical) return canonical;
+  }
+  return apiName;
+}
 
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 min
 const FD_BASE = 'https://api.football-data.org/v4';
@@ -84,31 +97,33 @@ function parseResults(standings, matchesData) {
     if (!letter || !group.table?.length) continue;
     const allPlayed = group.table.every(r => r.playedGames >= 3);
     results.groups[letter] = {
-      winner: allPlayed ? group.table[0].team.name : null,
+      winner: allPlayed ? canonicalize(group.table[0].team.name) : null,
       complete: allPlayed,
     };
     for (const row of group.table) {
       if (!row.team?.name || row.playedGames === 0) continue;
-      results.groupStandings[row.team.name] = {
+      const cName = canonicalize(row.team.name);
+      results.groupStandings[cName] = {
         points: row.points ?? 0,
         played: row.playedGames ?? 0,
         won: row.won ?? 0,
         goalDiff: row.goalDifference ?? 0,
         goalsFor: row.goalsFor ?? 0,
       };
-      results.teamGroup[row.team.name] = letter;
+      results.teamGroup[cName] = letter;
     }
 
     // Neljäs sija = varma eliminointi jos ei voi enää edetä
     if (group.table.length === 4) {
       const r4 = group.table[3];
+      const r4name = r4?.team?.name ? canonicalize(r4.team.name) : null;
       // 3 peliä pelannut viimeinen → eliminoitu
-      if (r4?.team?.name && r4.playedGames >= 3) {
-        if (!results.eliminated.includes(r4.team.name)) results.eliminated.push(r4.team.name);
+      if (r4name && r4.playedGames >= 3) {
+        if (!results.eliminated.includes(r4name)) results.eliminated.push(r4name);
       }
       // 0 pistettä 2 pelissä = 2 tappiota = ei voi edetä (max 3 pts ei riitä 2026 MM:ssa)
-      if (r4?.team?.name && r4.playedGames === 2 && r4.points === 0) {
-        if (!results.eliminated.includes(r4.team.name)) results.eliminated.push(r4.team.name);
+      if (r4name && r4.playedGames === 2 && r4.points === 0) {
+        if (!results.eliminated.includes(r4name)) results.eliminated.push(r4name);
       }
     }
   }
@@ -120,12 +135,14 @@ function parseResults(standings, matchesData) {
     const isKnockout = STAGE_MAP[round] || round === 'ROUND_OF_32' || round === 'LAST_32';
     if (!isKnockout) continue;
 
-    knockoutParticipants.add(match.homeTeam.name);
-    knockoutParticipants.add(match.awayTeam.name);
+    const homeName = canonicalize(match.homeTeam.name);
+    const awayName = canonicalize(match.awayTeam.name);
+    knockoutParticipants.add(homeName);
+    knockoutParticipants.add(awayName);
 
     // Tulevat ottelut bracket-laskentaa varten
     if (match.status === 'SCHEDULED' || match.status === 'TIMED') {
-      results.bracket.push({ round, team1: match.homeTeam.name, team2: match.awayTeam.name });
+      results.bracket.push({ round, team1: homeName, team2: awayName });
     }
 
     if (match.status !== 'FINISHED') continue;
@@ -135,13 +152,13 @@ function parseResults(standings, matchesData) {
     const scoreWinner = match.score?.winner;
     if (!scoreWinner || scoreWinner === 'DRAW') continue;
 
-    const winnerName = scoreWinner === 'HOME_TEAM' ? match.homeTeam.name : match.awayTeam.name;
-    const loserName  = scoreWinner === 'HOME_TEAM' ? match.awayTeam.name : match.homeTeam.name;
+    const winnerName = scoreWinner === 'HOME_TEAM' ? homeName : awayName;
+    const loserName  = scoreWinner === 'HOME_TEAM' ? awayName : homeName;
 
     if (target === 'final') {
       results.winner = winnerName;
-      if (!results.top2.includes(match.homeTeam.name)) results.top2.push(match.homeTeam.name);
-      if (!results.top2.includes(match.awayTeam.name)) results.top2.push(match.awayTeam.name);
+      if (!results.top2.includes(homeName)) results.top2.push(homeName);
+      if (!results.top2.includes(awayName)) results.top2.push(awayName);
     } else {
       if (!results[target].includes(winnerName)) results[target].push(winnerName);
     }
